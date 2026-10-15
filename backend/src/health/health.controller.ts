@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Optional } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import { databaseUrl } from "../config/env";
+import { databaseUrl, hetznerApiKey } from "../config/env";
 
 @Controller("health")
 export class HealthController {
@@ -23,6 +23,7 @@ export class HealthController {
       database,
       quranProvider: "alquran.cloud/quran-uthmani",
       trustedAqeedahSource: "أصول الإيمان في ضوء الكتاب والسنة",
+      ask: hetznerApiKey() ? "configured" : "not_configured",
     };
   }
 }

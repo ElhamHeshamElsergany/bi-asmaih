@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { AskModule } from "./ask/ask.module";
 import { AqeedahModule } from "./aqeedah/aqeedah.module";
 import { AttributesModule } from "./attributes/attributes.module";
 import { BooksModule } from "./books/books.module";
@@ -22,6 +23,7 @@ const persistence = databaseUrl()
       envFilePath: [".env.local", ".env"],
     }),
     ExternalProvidersModule,
+    AskModule,
     ...persistence,
   ],
   controllers: [HealthController],

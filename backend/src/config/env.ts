@@ -25,3 +25,15 @@ export function listenPort(): number {
   const port = Number(optionalEnv("PORT") ?? "4000");
   return Number.isInteger(port) && port > 0 ? port : 4000;
 }
+
+export function hetznerApiBaseUrl(): string {
+  return (optionalEnv("HETZNER_API_BASE_URL") ?? "https://inference.hetzner.com/api/v1").replace(/\/$/, "");
+}
+
+export function hetznerApiKey(): string | undefined {
+  return optionalEnv("HETZNER_API_KEY") ?? optionalEnv("LLM_API_KEY");
+}
+
+export function hetznerModel(): string {
+  return optionalEnv("HETZNER_MODEL") ?? "Qwen/Qwen3.6-35B-A3B-FP8";
+}
