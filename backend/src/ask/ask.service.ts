@@ -7,7 +7,11 @@ export const INSUFFICIENT_ANSWER = "لم أجد في المصادر المتاح
 
 const SYSTEM_PROMPT = `أنت تجيب في تطبيق «اعرف ربك».
 أجب بالعربية فقط، وبشرح مبسط، اعتمادًا على السياق المرفق حصرًا.
-السياق مقاطع من كتاب «أصول الإيمان في ضوء الكتاب والسنة» وقد راجعه المشرف.
+السياق نوعان، ولا تخلط بينهما:
+- كتاب «أصول الإيمان في ضوء الكتاب والسنة».
+- الدرر السنية، الموسوعة العقدية، ومنه قائمة الأسماء التي قالت إنها أحصتها من الكتاب والسنة.
+سمِّ المصدر الذي تعتمد عليه.
+إذا قال المقطع إن الاسم وارد في الإحصاء وإن المعنى غير موجود، فاذكر الورود ولا تشرح المعنى.
 لا تستخدم أي معلومة من خارج السياق.
 لا تخترع أسماء الله ولا صفاته ولا أحكامًا ولا آيات ولا أحاديث ولا درجات أحاديث ولا آراء.
 لا تكمل نصًا مبتورًا أو منقوصًا في السياق.
@@ -16,10 +20,12 @@ ${INSUFFICIENT_ANSWER}`;
 
 export type AskSource = {
   book: string;
-  page: number;
+  page: number | null;
   section: string;
   excerpt: string;
   label: "النص من المصدر";
+  sourceKind: "book" | "dorar";
+  url?: string;
 };
 
 export type AskResponse = {
@@ -44,7 +50,11 @@ export class AskService {
     }
 
     const context = matches
-      .map((passage, index) => `[${index + 1}] ${passage.section}، ص ${passage.page}\n${passage.excerpt}`)
+      .map((passage, index) => {
+        const kind = passage.sourceKind === "dorar" ? "الدرر السنية" : "الكتاب";
+        const locator = passage.url ? passage.url : `ص ${passage.page}`;
+        return `[${index + 1}] ${kind} — ${passage.section} — ${locator}\n${passage.excerpt}`;
+      })
       .join("\n\n");
 
     const answer = await this.complete(key, `السؤال:\n${question}\n\nالسياق:\n${context}`);
@@ -61,6 +71,8 @@ export class AskService {
         section: passage.section,
         excerpt: passage.excerpt,
         label: "النص من المصدر" as const,
+        sourceKind: passage.sourceKind === "dorar" ? ("dorar" as const) : ("book" as const),
+        url: passage.url,
       })),
     };
   }

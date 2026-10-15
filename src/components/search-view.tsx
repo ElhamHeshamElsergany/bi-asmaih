@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { messages } from "@/content/book";
+import { dorarNameList, filterListedNames } from "@/content/dorar-names";
 import { searchTopics } from "@/lib/search";
 import { typeLabel } from "@/lib/arabic";
 
@@ -12,6 +13,7 @@ export function SearchView() {
   const initial = params.get("q") ?? "";
   const [query, setQuery] = useState(initial);
   const results = useMemo(() => searchTopics(query), [query]);
+  const names = useMemo(() => (query.trim().length >= 2 ? filterListedNames(query) : []), [query]);
   const ready = query.trim().length >= 2;
 
   return (
@@ -48,6 +50,30 @@ export function SearchView() {
           </Link>
         ))}
       </section>
+
+      {ready ? (
+        <section className="stack">
+          <h2>{dorarNameList.title}</h2>
+          {names.length === 0 ? <p className="card quiet">لم يرد هذا اللفظ في إحصاء الدرر السنية المحفوظ لدينا.</p> : null}
+          <div className="name-index">
+            {names.map((item) =>
+              item.lessonSlug ? (
+                <Link key={item.name} className="chip" data-local="true" href={`/topic/${item.lessonSlug}`}>
+                  {item.name}
+                </Link>
+              ) : item.dorarId ? (
+                <a key={item.name} className="chip" href={`https://dorar.net/aqeeda/${item.dorarId}`} target="_blank" rel="noreferrer">
+                  {item.name}
+                </a>
+              ) : (
+                <span key={item.name} className="chip">
+                  {item.name}
+                </span>
+              ),
+            )}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

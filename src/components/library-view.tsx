@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { dorarNameList, filterListedNames } from "@/content/dorar-names";
 import { libraryScope } from "@/content/learning";
 import { topics } from "@/content/topics";
 import { searchTopics } from "@/lib/search";
@@ -16,6 +17,39 @@ const filters: { id: "all" | TopicType; label: string }[] = [
   { id: "name", label: "الأسماء" },
   { id: "attribute", label: "الصفات" },
 ];
+
+function NameIndex({ query }: { query: string }) {
+  const names = filterListedNames(query);
+  if (names.length === 0) {
+    return <p className="card quiet">لم يرد هذا اللفظ في إحصاء الدرر السنية المحفوظ لدينا.</p>;
+  }
+  return (
+    <div className="name-index">
+      {names.map((item) => {
+        const key = `${item.name}-${item.dorarId ?? "text"}`;
+        if (item.lessonSlug) {
+          return (
+            <Link key={key} className="chip" data-local="true" href={`/topic/${item.lessonSlug}`}>
+              {item.name}
+            </Link>
+          );
+        }
+        if (item.dorarId) {
+          return (
+            <a key={key} className="chip" href={`https://dorar.net/aqeeda/${item.dorarId}`} target="_blank" rel="noreferrer">
+              {item.name}
+            </a>
+          );
+        }
+        return (
+          <span key={key} className="chip">
+            {item.name}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export function LibraryView() {
   const params = useSearchParams();
@@ -42,7 +76,7 @@ export function LibraryView() {
             i
           </button>
         </div>
-        <p className="quiet">أسماء وصفات ورد لها بيان في الكتاب المعتمد. ليست قائمة مغلقة.</p>
+        <p className="quiet">المواد المشروحة من الكتاب. وفهرس الأسماء من إحصاء الدرر السنية للكتاب والسنة.</p>
       </header>
 
       <form className="search" action="/search">
@@ -76,7 +110,7 @@ export function LibraryView() {
       </div>
 
       {results.length === 0 ? (
-        <p className="card quiet">لا توجد في النسخة الحالية مادة مراجعة لهذا البحث.</p>
+        <p className="card quiet">لا توجد في النسخة الحالية مادة مراجعة مشروحة لهذا البحث.</p>
       ) : (
         <div className="stack">
           {results.map((topic) => (
@@ -89,6 +123,19 @@ export function LibraryView() {
               </Link>
             ))}
         </div>
+      )}
+
+      {type === "attribute" ? null : (
+        <section className="stack">
+          <h2>{dorarNameList.title}</h2>
+          <p className="quiet">{dorarNameList.statement}</p>
+          <NameIndex query={query} />
+          <p className="meta">
+            <a href={dorarNameList.url}>{dorarNameList.sourceTitle}</a>
+            <br />
+            {dorarNameList.citation}
+          </p>
+        </section>
       )}
 
       <Sheet open={info} title={libraryScope.title} onClose={() => setInfo(false)}>

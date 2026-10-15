@@ -36,9 +36,13 @@ function scorePassage(normalizedQuestion: string, tokens: string[], passage: Boo
   const normalizedSection = normalizeArabic(passage.section);
   const normalizedTopicQuestion = normalizeArabic(passage.question);
   for (const token of tokens) {
-    if (normalizedSection.includes(token)) score += 3;
-    if (normalizedTopicQuestion.includes(token)) score += 4;
-    if (haystack.includes(token)) score += 2;
+    if (hasWord(normalizedSection, token)) score += 3;
+    if (hasWord(normalizedTopicQuestion, token)) score += 4;
+    if (hasWord(haystack, token)) score += 2;
   }
   return score;
+}
+
+function hasWord(haystack: string, token: string): boolean {
+  return haystack.split(" ").includes(token);
 }
