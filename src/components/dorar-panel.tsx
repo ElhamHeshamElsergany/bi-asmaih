@@ -1,5 +1,7 @@
 "use client";
 
+// Paused with the Dorar API. Not rendered. The book remains the visible source.
+
 import { useEffect, useState } from "react";
 import { messages } from "@/content/book";
 import type { DorarReference } from "@/lib/types";

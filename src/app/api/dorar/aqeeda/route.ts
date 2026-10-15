@@ -1,30 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { searchDorar } from "@/lib/dorar";
+import { NextResponse } from "next/server";
 
-const ins = new Set(["title", "text", "both"]);
+// Dorar Al-Sunniyyah is paused. Their Aqeedah API requires a private token,
+// so the app does not call it. Religious content stays on the approved book.
+// To restore it later, wire this route back to searchDorar in src/lib/dorar.ts.
 
-export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
-  const limitRaw = Number(request.nextUrl.searchParams.get("limit") ?? "8");
-  const scope = request.nextUrl.searchParams.get("in") ?? "both";
-  const highlight = request.nextUrl.searchParams.get("highlight") === "1" ? 1 : 0;
-
-  if (q.length < 2 || q.length > 200 || !ins.has(scope) || !Number.isInteger(limitRaw) || limitRaw < 1 || limitRaw > 20) {
-    return NextResponse.json(
-      { ok: false, message: "لا يوجد لدينا مصدر كافٍ للإجابة على هذا السؤال حاليًا.", results: [], code: "invalid_request" },
-      { status: 400 },
-    );
-  }
-
-  const result = await searchDorar({
-    q,
-    limit: limitRaw,
-    in: scope as "title" | "text" | "both",
-    highlight,
-  });
-
-  return NextResponse.json(result, {
-    status: result.ok ? 200 : 503,
-    headers: { "Cache-Control": result.ok ? "public, max-age=300" : "no-store" },
-  });
+export function GET() {
+  return NextResponse.json(
+    {
+      ok: false,
+      code: "dorar_disabled",
+      message: "تكامل الدرر السنية متوقف لأنه يحتاج رمز وصول. المصدر المعتمد حاليًا هو الكتاب.",
+      results: [],
+    },
+    { status: 200, headers: { "Cache-Control": "no-store" } },
+  );
 }

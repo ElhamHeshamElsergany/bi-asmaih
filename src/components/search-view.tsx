@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { messages } from "@/content/book";
 import { searchTopics } from "@/lib/search";
 import { typeLabel } from "@/lib/arabic";
-import { DorarPanel } from "@/components/dorar-panel";
 
 export function SearchView() {
   const params = useSearchParams();
@@ -49,12 +48,6 @@ export function SearchView() {
           </Link>
         ))}
       </section>
-
-      {ready ? (
-        <section className="card stack">
-          <DorarPanel query={query} />
-        </section>
-      ) : null}
     </div>
   );
 }

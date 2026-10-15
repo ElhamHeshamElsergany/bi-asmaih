@@ -1,6 +1,9 @@
+// Paused: Dorar's Aqeedah API requires DORAR_API_TOKEN, so nothing in the UI calls this file.
 import type { DorarReference } from "@/lib/types";
 
-const ENDPOINT = "https://dorar.net/api/v1/aqeeda/search";
+/** Official service: https://dorar.net/index.php/api-services/aqeeda */
+const DORAR_ORIGIN = "https://dorar.net";
+const ENDPOINT = `${DORAR_ORIGIN}/api/v1/aqeeda/search`;
 const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
 const MIN_GAP_MS = 400;
 const MAX_PER_MINUTE = 20;
@@ -12,10 +15,13 @@ const recentCalls: number[] = [];
 let lastCall = 0;
 let chain: Promise<unknown> = Promise.resolve();
 
+export type DorarMatch = "any" | "all" | "phrase";
+
 export type DorarQuery = {
   q: string;
   limit: number;
   in: "title" | "text" | "both";
+  match: DorarMatch;
   highlight: 0 | 1;
 };
 
@@ -24,6 +30,7 @@ export type DorarResponse = {
   message: string;
   results: DorarReference[];
   code?: string;
+  upstream: string;
 };
 
 function sleep(ms: number) {
@@ -79,8 +86,12 @@ function pick(row: Record<string, unknown>, keys: string[]): string {
 }
 
 export function safeDorarUrl(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
   try {
-    const url = new URL(value);
+    const url = trimmed.startsWith("/")
+      ? new URL(trimmed, DORAR_ORIGIN)
+      : new URL(trimmed.startsWith("http") ? trimmed : `${DORAR_ORIGIN}/${trimmed.replace(/^\/+/, "")}`);
     if (url.protocol !== "https:" || !url.hostname.endsWith("dorar.net")) return null;
     return url.toString();
   } catch {
@@ -101,37 +112,61 @@ function normalize(payload: unknown): DorarReference[] {
   return results;
 }
 
+function unavailable(code: string, message = "تعذّر تحميل المصدر حاليًا."): DorarResponse {
+  return { ok: false, message, results: [], code, upstream: ENDPOINT };
+}
+
 async function requestOnce(query: DorarQuery, token: string): Promise<Response> {
   const url = new URL(ENDPOINT);
   url.searchParams.set("q", query.q);
   url.searchParams.set("limit", String(query.limit));
   url.searchParams.set("in", query.in);
+  url.searchParams.set("match", query.match);
   url.searchParams.set("highlight", String(query.highlight));
   return fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+      "User-Agent": "bi-asmaih/0.1 (+https://dorar.net/index.php/api-services/aqeeda)",
     },
     cache: "no-store",
   });
 }
 
+async function errorCode(response: Response): Promise<string> {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("json")) {
+    return response.status === 401 ? "token_invalid" : "unavailable";
+  }
+  try {
+    const body = asRecord(await response.json());
+    if (!body) return "unavailable";
+    const nested = asRecord(body.error);
+    return pick(body, ["code"]) || (nested ? pick(nested, ["code"]) : "") || "unavailable";
+  } catch {
+    return "unavailable";
+  }
+}
+
 export async function searchDorar(query: DorarQuery): Promise<DorarResponse> {
   const token = process.env.DORAR_API_TOKEN?.trim();
   if (!token) {
-    return { ok: false, message: "تعذّر تحميل المصدر حاليًا.", results: [], code: "missing_token" };
+    return unavailable(
+      "missing_token",
+      "هذا العنوان وسيط داخل التطبيق فقط. البحث يذهب إلى https://dorar.net/api/v1/aqeeda/search بعد وضع DORAR_API_TOKEN في ملف .env.local.",
+    );
   }
 
   const cacheKey = JSON.stringify(query);
   const cached = cache.get(cacheKey);
   if (cached && cached.expires > Date.now()) {
-    return { ok: true, message: "", results: cached.results };
+    return { ok: true, message: "", results: cached.results, upstream: ENDPOINT };
   }
 
   return enqueue(async () => {
     const again = cache.get(cacheKey);
     if (again && again.expires > Date.now()) {
-      return { ok: true, message: "", results: again.results };
+      return { ok: true, message: "", results: again.results, upstream: ENDPOINT };
     }
 
     let response: Response | null = null;
@@ -147,19 +182,19 @@ export async function searchDorar(query: DorarQuery): Promise<DorarResponse> {
     }
 
     if (!response || !response.ok) {
-      return { ok: false, message: "تعذّر تحميل المصدر حاليًا.", results: [], code: "unavailable" };
+      return unavailable(response ? await errorCode(response) : "unavailable");
     }
 
     let payload: unknown = null;
     try {
       payload = await response.json();
     } catch {
-      return { ok: false, message: "تعذّر تحميل المصدر حاليًا.", results: [], code: "invalid_payload" };
+      return unavailable("invalid_payload");
     }
 
     const results = normalize(payload);
     if (cache.size > 100) cache.clear();
     cache.set(cacheKey, { expires: Date.now() + CACHE_TTL_MS, results });
-    return { ok: true, message: "", results };
+    return { ok: true, message: "", results, upstream: ENDPOINT };
   });
 }

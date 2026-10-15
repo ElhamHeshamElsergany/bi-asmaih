@@ -4,7 +4,6 @@ import { getTopic } from "@/content/topics";
 import { minutesLabel, typeLabel } from "@/lib/arabic";
 import type { Topic } from "@/lib/types";
 import { Chevron, Pattern } from "@/components/icons";
-import { DorarPanel } from "@/components/dorar-panel";
 import { SourceBadge } from "@/components/source-badge";
 import { TopicActions } from "@/components/topic-actions";
 
@@ -119,7 +118,6 @@ export function TopicArticle({ topic }: { topic: Topic }) {
             الصفحة: {reference.page}
           </p>
         ))}
-        <DorarPanel query={topic.titleArabic} />
       </section>
     </article>
   );
