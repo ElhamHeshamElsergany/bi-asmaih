@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start-server.mjs",
     "lint": "next lint",
     "icons": "node scripts/make-icons.mjs"
   },
@@ -21,6 +21,7 @@
     "@types/react-dom": "19.1.6",
     "eslint": "9.32.0",
     "eslint-config-next": "^15.5.28",
+    "sharp": "^0.34.5",
     "typescript": "5.9.2"
   }
 }

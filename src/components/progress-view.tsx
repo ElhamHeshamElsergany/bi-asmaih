@@ -21,12 +21,12 @@ export function ProgressView() {
         <p className="kicker">مكتبتي</p>
         <h1 className="page-title">تقدمي</h1>
         <p className="quiet">
-          خلّصت {progress.read.length} خلاصة، وحفظت {progress.bookmarks.length}. إجابات الأسئلة الصحيحة: {correct} من {quizzes.length}.
+          قرأت {progress.read.length} من الخلاصات، وحفظت {progress.bookmarks.length}. إجابات الأسئلة الصحيحة: {correct} من {quizzes.length}.
         </p>
       </header>
 
       <section className="card stack">
-        <h2>إنت هنا علشان…</h2>
+        <h2>من أين تحب أن تبدأ؟</h2>
         <p className="quiet">هذا يغيّر الاقتراح فقط، ولا يقفل عليك مستوى.</p>
         <div className="stack">
           {intents.map((intent) => (

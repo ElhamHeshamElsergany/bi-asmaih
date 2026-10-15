@@ -7,6 +7,7 @@ import { messages } from "@/content/book";
 import { dorarNameList, filterListedNames } from "@/content/dorar-names";
 import { searchTopics } from "@/lib/search";
 import { typeLabel } from "@/lib/arabic";
+import { pagePath } from "@/lib/site";
 
 export function SearchView() {
   const params = useSearchParams();
@@ -20,7 +21,7 @@ export function SearchView() {
     <div className="stack">
       <header className="stack">
         <h1 className="page-title">بحث</h1>
-        <form className="search" action="/search">
+        <form className="search" action={pagePath("/search")}>
           <label className="sr-only" htmlFor="q">
             ابحث عن اسم أو صفة
           </label>

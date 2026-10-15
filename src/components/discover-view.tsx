@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { questionGroups, quizzes, sayings } from "@/content/learning";
 import { getTopic } from "@/content/topics";
+import { ArrowIcon } from "@/components/icons";
 import { SayingCard } from "@/components/saying-card";
 import { useProgress } from "@/components/use-progress";
 
@@ -24,8 +25,9 @@ export function DiscoverView() {
               const topic = getTopic(slug);
               if (!topic) return null;
               return (
-                <Link key={slug} className="card" href={`/topic/${slug}`}>
+                <Link key={slug} className="card card-link" href={`/topic/${slug}`}>
                   <strong>{topic.question}</strong>
+                  <ArrowIcon />
                 </Link>
               );
             })}
@@ -34,7 +36,7 @@ export function DiscoverView() {
       ))}
 
       <section id="sayings" className="stack">
-        <h2>بنقولها كتير… بس صح؟</h2>
+        <h2>عبارات شائعة… هل هي صحيحة؟</h2>
         <p className="quiet">الإجابة لا تظهر إلا ومعها مصدر من الكتاب.</p>
         {sayings.map((saying) => (
           <SayingCard key={saying.id} {...saying} />
@@ -46,7 +48,7 @@ export function DiscoverView() {
         {quizzes.map((quiz) => (
           <Link
             key={quiz.id}
-            className="card"
+            className="card card-link"
             href={`/quiz/${quiz.id}`}
             onClick={() =>
               update((current) => ({
@@ -56,6 +58,7 @@ export function DiscoverView() {
             }
           >
             <strong>{quiz.prompt}</strong>
+            <ArrowIcon />
           </Link>
         ))}
       </section>

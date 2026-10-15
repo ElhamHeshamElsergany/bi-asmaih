@@ -16,15 +16,27 @@ const evidenceLabel = {
 export function TopicArticle({ topic }: { topic: Topic }) {
   const related = topic.relatedTopics.map((slug) => getTopic(slug)).filter((item): item is Topic => Boolean(item));
 
+  const section =
+    topic.type === "concept"
+      ? { href: "/library", label: "الأسماء والصفات" }
+      : { href: `/library?type=${topic.type}`, label: topic.type === "name" ? "الأسماء" : "الصفات" };
+
   return (
     <article className="stack">
+      <nav className="crumbs" aria-label="مسار الصفحة">
+        <Link href="/">الرئيسية</Link>
+        <span aria-hidden="true">/</span>
+        <Link href={section.href}>{section.label}</Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{topic.titleArabic}</span>
+      </nav>
       <header className="card hero">
         <Pattern />
         <div className="cluster">
           <span className="type-pill">{typeLabel(topic.type)}</span>
           <span className="meta">{minutesLabel(topic.estimatedMinutes)}</span>
         </div>
-        <h1 className={topic.type === "concept" ? "page-title" : "display"}>{topic.titleArabic}</h1>
+        <h1 className={topic.type === "concept" ? "page-title" : "display name-title"}>{topic.titleArabic}</h1>
         <p className="lead">{topic.question}</p>
         {topic.scopeNote ? <p className="quiet">{topic.scopeNote}</p> : null}
         <div className="cluster">
@@ -64,7 +76,7 @@ export function TopicArticle({ topic }: { topic: Topic }) {
               </article>
             ))
           )}
-          <h3>{topic.type === "concept" ? "ماذا أتعلم من هذا؟" : "ماذا أتعلم من هذا؟"}</h3>
+          <h3>ماذا أتعلم من هذا؟</h3>
           {topic.lessons.length === 0 ? (
             <p className="quiet">{topic.emptyLesson ?? messages.missing}</p>
           ) : (

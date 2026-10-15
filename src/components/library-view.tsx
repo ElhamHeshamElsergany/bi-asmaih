@@ -8,7 +8,9 @@ import { libraryScope } from "@/content/learning";
 import { topics } from "@/content/topics";
 import { searchTopics } from "@/lib/search";
 import { typeLabel } from "@/lib/arabic";
+import { pagePath } from "@/lib/site";
 import type { TopicType } from "@/lib/types";
+import { ArrowIcon } from "@/components/icons";
 import { Sheet } from "@/components/sheet";
 import { SourceBadge } from "@/components/source-badge";
 
@@ -70,16 +72,17 @@ export function LibraryView() {
   return (
     <div className="stack">
       <header className="stack">
+        <p className="kicker">ما ورد في مصادرنا</p>
         <div className="cluster">
-          <h1 className="page-title">ما ورد في مصادرنا</h1>
-          <button className="icon-btn" type="button" aria-label="لماذا لا نقول كل أسماء الله؟" onClick={() => setInfo(true)}>
-            i
+          <h1 className="page-title">أسماء الله وصفاته</h1>
+          <button className="icon-btn small" type="button" aria-label="لماذا لا نقول كل أسماء الله؟" onClick={() => setInfo(true)}>
+            ؟
           </button>
         </div>
         <p className="quiet">المواد المشروحة من الكتاب. وفهرس الأسماء من إحصاء الدرر السنية للكتاب والسنة.</p>
       </header>
 
-      <form className="search" action="/search">
+      <form className="search" action={pagePath("/search")}>
         <label className="sr-only" htmlFor="library-search">
           ابحث عن اسم أو صفة
         </label>
@@ -114,14 +117,15 @@ export function LibraryView() {
       ) : (
         <div className="stack">
           {results.map((topic) => (
-              <Link key={topic.slug} className="card stack" href={`/topic/${topic.slug}`}>
-                <div className="cluster">
-                  <span className="type-pill">{typeLabel(topic.type)}</span>
-                </div>
-                <strong>{topic.titleArabic}</strong>
+            <Link key={topic.slug} className="card card-link" href={`/topic/${topic.slug}`}>
+              <span className="stack tight">
+                <span className="type-pill">{typeLabel(topic.type)}</span>
+                <strong className="name-title">{topic.titleArabic}</strong>
                 <span className="quiet">{topic.shortExplanation.text}</span>
-              </Link>
-            ))}
+              </span>
+              <ArrowIcon />
+            </Link>
+          ))}
         </div>
       )}
 

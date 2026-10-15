@@ -6,6 +6,7 @@ import { intentCopy } from "@/content/learning";
 import type { Intent } from "@/lib/types";
 import { saveOnboarding, saveProgress, loadProgress } from "@/lib/storage";
 import { Pattern } from "@/components/icons";
+import { LogoMark } from "@/components/logo";
 
 const intents = Object.keys(intentCopy) as Intent[];
 
@@ -23,8 +24,9 @@ export function OnboardingView() {
 
   if (step === 1) {
     return (
-      <section className="card hero stack" style={{ minHeight: "70vh", justifyContent: "flex-end" }}>
+      <section className="verse-hero stack" style={{ minHeight: "70vh", alignContent: "end" }}>
         <Pattern />
+        <LogoMark className="logo-mark large" />
         <p className="kicker">ببساطة، ومن مصدر يمكنك الرجوع إليه</p>
         <h1 className="display">اعرف ربك</h1>
         <p className="lead">تعلّم أسماء الله وصفاته بطريقة بسيطة، موثوقة، وقريبة منك.</p>
@@ -38,8 +40,8 @@ export function OnboardingView() {
   return (
     <section className="stack">
       <header className="stack">
-        <h1 className="page-title">إنت هنا علشان…</h1>
-        <p className="quiet">نستخدم اختيارك لاقتراح البداية فقط. تقدر تغيّره وقت ما تحب.</p>
+        <h1 className="page-title">من أين تحب أن تبدأ؟</h1>
+        <p className="quiet">نستخدم اختيارك لاقتراح البداية فقط، وتستطيع تغييره متى شئت.</p>
       </header>
       <div className="stack">
         {intents.map((item) => (
